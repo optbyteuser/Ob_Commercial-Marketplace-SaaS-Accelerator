@@ -36,21 +36,16 @@ $ConnectionString = az keyvault secret show `
 	--query "{value:value}" `
 	--output tsv
 
-#Extract components from ConnectionString since Invoke-Sqlcmd needs them separately
-$Server = ($ConnectionString -split "Host=")[1] -split " ")[0]
-$Database = ($ConnectionString -split "Database=")[1] -split " ")[0]
-$User = ($ConnectionString -split "User Id=")[1] -split " ")[0]
-$Pass = ($ConnectionString -split "Password=")[1] -split " ")[0]
 
 Write-host "## Retrieved ConnectionString from KeyVault"
 Set-Content -Path ../src/AdminSite/appsettings.Development.json -value "{`"ConnectionStrings`": {`"DefaultConnection`":`"$ConnectionString`"}}"
 
 dotnet-ef migrations script `
-	--idempotent `
-	--context SaaSKitContext `
-	--project ../src/DataAccess/DataAccess.csproj `
-	--startup-project ../src/AdminSite/AdminSite.csproj `
-	--output script.sql
+    --idempotent `
+    --context SaaSKitContext `
+    --project ../src/DataAccess/DataAccess.csproj `
+    --startup-project ../src/AdminSite/AdminSite.csproj `
+    --output script.sql
 	
 Write-host "## Generated migration script"	
 
