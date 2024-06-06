@@ -80,7 +80,7 @@ BEGIN
         END IF;
     END IF;
 END $$;
-"
+"@
 
 # Create a Npgsql connection object
 $connection = New-Object Npgsql.NpgsqlConnection($ConnectionString)
