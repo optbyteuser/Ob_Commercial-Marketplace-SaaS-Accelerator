@@ -9,10 +9,10 @@ namespace Marketplace.SaaS.Accelerator.DataAccess.Migrations.Custom
     {
         public static void BaselineV2_DeSeedAll(this MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@"DROP PROCEDURE [dbo].[spGetSubscriptionParameters]");
-            migrationBuilder.Sql(@"DROP PROCEDURE [dbo].[spGetPlanEvents]");
-            migrationBuilder.Sql(@"DROP PROCEDURE [dbo].[spGetOfferParameters]");
-            migrationBuilder.Sql(@"DROP PROCEDURE [dbo].[spGetFormattedEmailBody]");
+            migrationBuilder.Sql(@"DROP PROCEDURE ""spGetSubscriptionParameters""");
+            migrationBuilder.Sql(@"DROP PROCEDURE ""spGetPlanEvents""");
+            migrationBuilder.Sql(@"DROP PROCEDURE ""spGetOfferParameters""");
+            migrationBuilder.Sql(@"DROP PROCEDURE ""spGetFormattedEmailBody""");
         }
 
 
@@ -21,395 +21,325 @@ namespace Marketplace.SaaS.Accelerator.DataAccess.Migrations.Custom
             //SQL Stored Procedures
 
             migrationBuilder.Sql(@"
-/*   
-Exec spGetSubscriptionParameters '53ff9e28-a55b-65e1-ff75-709aec6420fd','a35d4259-f3c9-429b-a871-21c4593fa4bf'  
-*/
-EXEC(N'
-CREATE Procedure [dbo].[spGetSubscriptionParameters]  
-(  
-@SubscriptionId Uniqueidentifier,  
-@PlanId Uniqueidentifier  
-)  
-AS  
-BEGIN  
-   
-Declare @OfferId Uniqueidentifier   
-Set @OfferId=(Select OfferId from Plans where PlanGuId =@PlanId )  
-SELECT    
-  Cast( ROW_NUMBER() OVER ( ORDER BY OA.ID) as Int)RowNumber  
-,isnull(SAV.ID,0) ID  
-,isnull(SAV.PlanAttributeId,PA.PlanAttributeId) PlanAttributeId  
-,ISNULL(SAV.PlanId,@PlanId) PlanId   
-,ISNULL(PA.OfferAttributeID ,OA.ID)  OfferAttributeID  
-,ISNULL(OA.DisplayName,'''')DisplayName  
-,ISNULL(OA.Type,'''')Type  
-,ISNULL(VT.ValueType,'''') ValueType  
-,ISnull(OA.DisplaySequence,0)DisplaySequence  
-,isnull(PA.IsEnabled,0) IsEnabled  
-,isnull(OA.IsRequired,0) IsRequired  
-,ISNULL(Value,'''')Value  
-,ISNULL(SubscriptionId,@SubscriptionId) SubscriptionId  
-,ISNULL(SAV.OfferID,OA.OfferId) OfferID  
-,SAV.UserId  
-,SAV.CreateDate  
-,ISNULL(oA.FromList,0) FromList  
-,ISNULL(OA.ValuesList,'''') ValuesList  
-,ISNULL(OA.Max,0) Max  
-,ISNULL(OA.Min,0) Min
-,ISNULL(VT.HTMLType,'''') HTMLType  
-from   
-[dbo].[OfferAttributes] OA  
-Inner  join   
-[dbo].[PlanAttributeMapping]  PA  
-on OA.ID= PA.OfferAttributeID and OA.OfferId=@OfferId  
-  
-and  PA.PlanId=@PlanId  
-Left Join   
-SubscriptionAttributeValues SAV  
-on SAV.PlanAttributeId= PA.PlanAttributeId  
-and SAV.SubscriptionId=@SubscriptionId  
-  
-inner join ValueTypes VT  
-ON OA.ValueTypeId=VT.ValueTypeId  
-  
-where    
-OA.Isactive=1   
-and PA.IsEnabled=1  
-END
-')");
+                                /*   
+                                Exec spGetSubscriptionParameters '53ff9e28-a55b-65e1-ff75-709aec6420fd','a35d4259-f3c9-429b-a871-21c4593fa4bf'  
+                                */
+                                CREATE OR REPLACE FUNCTION spGetSubscriptionParameters(
+                                    SubscriptionId UUID,
+                                    PlanId UUID
+                                )
+                                RETURNS VOID AS
+                                $$
+                                BEGIN
+                                    SELECT
+                                        ROW_NUMBER() OVER (ORDER BY OA.ID) AS RowNumber,
+                                        COALESCE(SAV.ID, 0) AS ID,
+                                        COALESCE(SAV.PlanAttributeId, PA.PlanAttributeId) AS PlanAttributeId,
+                                        COALESCE(SAV.PlanId, PlanId) AS PlanId,
+                                        COALESCE(PA.OfferAttributeID, OA.ID) AS OfferAttributeID,
+                                        COALESCE(OA.DisplayName, '') AS DisplayName,
+                                        COALESCE(OA.Type, '') AS Type,
+                                        COALESCE(VT.ValueType, '') AS ValueType,
+                                        COALESCE(OA.DisplaySequence, 0) AS DisplaySequence,
+                                        COALESCE(PA.IsEnabled, 0) AS IsEnabled,
+                                        COALESCE(OA.IsRequired, 0) AS IsRequired,
+                                        COALESCE(Value, '') AS Value,
+                                        COALESCE(SubscriptionId, SubscriptionId) AS SubscriptionId,
+                                        COALESCE(SAV.OfferID, OA.OfferId) AS OfferID,
+                                        SAV.UserId,
+                                        SAV.CreateDate,
+                                        COALESCE(OA.FromList, 0) AS FromList,
+                                        COALESCE(OA.ValuesList, '') AS ValuesList,
+                                        COALESCE(OA.Max, 0) AS Max,
+                                        COALESCE(OA.Min, 0) AS Min,
+                                        COALESCE(VT.HTMLType, '') AS HTMLType
+                                    FROM
+                                        OfferAttributes OA
+                                    INNER JOIN
+                                        PlanAttributeMapping PA ON OA.ID = PA.OfferAttributeID AND OA.OfferId = (SELECT OfferId FROM Plans WHERE PlanGuId = PlanId)
+                                    AND
+                                        PA.PlanId = PlanId
+                                    LEFT JOIN
+                                        SubscriptionAttributeValues SAV ON SAV.PlanAttributeId = PA.PlanAttributeId AND SAV.SubscriptionId = SubscriptionId
+                                    INNER JOIN
+                                        ValueTypes VT ON OA.ValueTypeId = VT.ValueTypeId
+                                    WHERE
+                                        OA.Isactive = 1
+                                    AND
+                                        PA.IsEnabled = 1;
+                                END;
+                                $$
+                                LANGUAGE plpgsql;
+
+                    ");
 
             migrationBuilder.Sql(@"
-/*   
-Exec spGetPlanEvents 'B8F4D276-15EB-4EB6-89D4-E600FF1098EF'  
-*/
-EXEC(N'
-CREATE Procedure [dbo].[spGetPlanEvents]  
-(  
-@PlanId Uniqueidentifier  
-)  
-AS  
-BEGIN  
-   
-Declare @OfferId Uniqueidentifier   
---Set @OfferId=(Select OfferId from Plans where PlanGuId =@PlanId )  
---isnull(PlanAttributeId,ID),ParameterId,DisplayName,DisplaySequence,isnull(IsEnabled,0)  
-  
-SELECT    
- Cast(ROW_NUMBER() OVER ( ORDER BY E.EventsId)  as Int) RowNumber  
- ,ISNULL(OEM.Id,0)  Id  
-,ISNULL(OEM.PlanId,@PlanId) PlanId  
---,OEM.ARMTemplateId  
-,ISNULL(OEM.Isactive,0) Isactive  
-,ISNULL(OEM.CopyToCustomer,0) CopyToCustomer
-,ISNULL(OEM.SuccessStateEmails,'''')SuccessStateEmails  
-,ISNULL(OEM.FailureStateEmails,'''')FailureStateEmails  
-,E.EventsId as EventId  
-  
-,E.EventsName  
-from Events  E  
-left  join   
-PlanEventsMapping  OEM  
-on  
-E.EventsId= OEM.EventId and  OEM.PlanId= @PlanId  
-where    
-E.Isactive=1   
-  
-END
-')");
+                                /*   
+                                Exec spGetPlanEvents 'B8F4D276-15EB-4EB6-89D4-E600FF1098EF'  
+                                */
+                                CREATE OR REPLACE FUNCTION spGetPlanEvents(
+                                    PlanId UUID
+                                )
+                                RETURNS VOID AS
+                                $$
+                                BEGIN
+                                    SELECT    
+                                        ROW_NUMBER() OVER (ORDER BY E.EventsId) AS RowNumber,
+                                        COALESCE(OEM.Id, 0) AS Id,
+                                        COALESCE(OEM.PlanId, PlanId) AS PlanId,
+                                        COALESCE(OEM.Isactive, 0) AS Isactive,
+                                        COALESCE(OEM.CopyToCustomer, 0) AS CopyToCustomer,
+                                        COALESCE(OEM.SuccessStateEmails, '') AS SuccessStateEmails,
+                                        COALESCE(OEM.FailureStateEmails, '') AS FailureStateEmails,
+                                        E.EventsId AS EventId,
+                                        E.EventsName
+                                    FROM 
+                                        Events E  
+                                    LEFT JOIN   
+                                        PlanEventsMapping OEM ON E.EventsId = OEM.EventId AND OEM.PlanId = PlanId  
+                                    WHERE    
+                                        E.Isactive = 1;   
+                                END;
+                                $$
+                                LANGUAGE plpgsql;
+                                ");
 
             migrationBuilder.Sql(@"
-/*   
-Exec spGetOfferParameters 'B8F4D276-15EB-4EB6-89D4-E600FF1098EF'  
-*/  
-EXEC(N'
-CREATE Procedure [dbo].[spGetOfferParameters]  
-(  
-@PlanId Uniqueidentifier  
-)  
-AS  
-BEGIN  
-   
-Declare @OfferId Uniqueidentifier   
-Set @OfferId=(Select OfferId from Plans where PlanGuId =@PlanId )  
-SELECT    
-  Cast( ROW_NUMBER() OVER ( ORDER BY OA.ID) as Int)RowNumber  
-,isnull(PA.PlanAttributeId,0) PlanAttributeId  
-,ISNULL(PA.PlanId,@PlanId) PlanId   
-,ISNULL(PA.OfferAttributeID ,OA.ID)  OfferAttributeID  
-  
-,OA.DisplayName  
---,OA.DisplaySequence  
-,isnull(PA.IsEnabled,0) IsEnabled  
-,OA.Type
-from [dbo].[OfferAttributes] OA  
-left  join   
-[dbo].[PlanAttributeMapping]  PA  
-on OA.ID= PA.OfferAttributeID and OA.OfferId=@OfferId  
-and  PA.PlanId=@PlanId  
-where    
-OA.Isactive=1   
-  
-END
-')");
+                                /*   
+                                Exec spGetOfferParameters 'B8F4D276-15EB-4EB6-89D4-E600FF1098EF'  
+                                */  
+                                CREATE OR REPLACE PROCEDURE spGetOfferParameters(
+                                    IN p_plan_id UUID
+                                ) 
+                                LANGUAGE plpgsql
+                                AS $$
+                                DECLARE
+                                    v_offer_id UUID;
+                                BEGIN                                   
+                                    SELECT offerid 
+                                    INTO v_offer_id
+                                    FROM plans 
+                                    WHERE planguid = p_plan_id;
+                                 
+                                    SELECT 
+                                        CAST(ROW_NUMBER() OVER (ORDER BY OA.id) AS INT) AS row_number,
+                                        COALESCE(PA.plan_attribute_id, 0) AS plan_attribute_id,
+                                        COALESCE(PA.plan_id, p_plan_id) AS plan_id,
+                                        COALESCE(PA.offer_attribute_id, OA.id) AS offer_attribute_id,
+                                        OA.display_name,
+                                        COALESCE(PA.is_enabled, 0) AS is_enabled,
+                                        OA.type
+                                    FROM 
+                                        offer_attributes OA
+                                    LEFT JOIN 
+                                        plan_attribute_mapping PA
+                                    ON 
+                                        OA.id = PA.offer_attribute_id AND OA.offer_id = v_offer_id AND PA.plan_id = p_plan_id
+                                    WHERE 
+                                        OA.isactive = TRUE;
+                                END;
+                                $$;
+                                ");
 
             migrationBuilder.Sql(@"
-EXEC(N'
-    Create Procedure [dbo].[spGetFormattedEmailBody]  
-    (  
-    @subscriptionId varchar(225),  
-    @processStatus varchar(225)   
-    )  
-  
-    /*  
-    EXEC spGetFormattedEmailBody ''86C334EC-5973-D337-7B2B-0D676513B0F9'',''success''
-    */  
-  
-    AS  
-    BEGIN  
-    declare @html varchar(max)   
-  
-    DECLARE   
-      @planId varchar(225)  
-    , @planGUId varchar(225)  
-    , @planName varchar(225)  
-    , @offerId varchar(225)  
-    , @offerGUId varchar(225)  
-    , @subscriptionStatus varchar(225)  
-    , @subscriptionName varchar(225)  
-    , @offerName varchar(225)  
-    , @customerName  varchar(225)  
-    , @customerEmailAddress  varchar(225)  
-    , @purchaserEmial  varchar(225)  
-    , @purchaserTenant  varchar(225)  
-    , @UserId int  
-  
-    Declare @applicationName Varchar(225) =(select [value] from [ApplicationConfiguration] where [Name]=''ApplicationName'')  
-    Declare @welcomeText varchar(MAX)=''''  
-  
-  
-    IF EXISTS (SELECT 1 FROM SUBSCRIPTIONS WHERE AMPSubscriptionId=@subscriptionId)  
-    BEGIN  
-     select  @planId =AMPPLanId,  
-     @subscriptionStatus =subscriptionstatus,  
-     @subscriptionName= [Name],  
-     @purchaserEmial=PurchaserEmail,  
-     @purchaserTenant=PurchaserTenantId,  
-     @UserId = UserId  
-     FROM SUBSCRIPTIONS WHERE AMPSubscriptionId=@subscriptionId  
-   
-      select   
-     @customerName =FullName,  
-     @customerEmailAddress= EmailAddress  
-     FROM USERS WHERE USERID=@UserId  
-  
-  
-     IF EXISTS (SELECT 1 FROM PLANS WHERE PLANID=@planId)  
-     BEGIN  
-      SELECT @offerGUId = OFFERID,  
-        @planName= DISPLAYNAME,  
-        @planGUId=PlanGUID  
-       FROM PLANS WHERE  PLANID=@planId  
-    
-      IF EXISTS (SELECT 1 FROM OFFERS WHERE OFFERGUID=@offerGUId)  
-      BEGIN  
-       Select @offerId = OFFERID ,  
-         @offerName=OFFERNAME   
-       FROM OFFERS WHERE  OFFERGUID=@offerGUId  
-      END  
-     END  
-    END  
-  
-    Create Table #Temp(HtmlLabel varchar(max), HtmlValue varchar(max))  
-    Insert into #Temp  
-  
-    select ''Customer Email Address'',@customerEmailAddress   UNION ALL  
-    select ''Customer Name'',@customerName       UNION ALL  
-    select ''SaaS Subscription Id'',@subscriptionId     UNION ALL  
-    select ''SaaS Subscription Name'',@subscriptionName    UNION ALL  
-    select ''SaaS Subscription Status'',@subscriptionStatus   UNION ALL  
-    select ''Plan'',@planName           UNION ALL  
-    select ''Purchaser Email Address'',@customerEmailAddress   UNION ALL  
-    select ''Purchaser Tenant'',@purchaserTenant      UNION ALL     
-    -- Parameters  
-    select   
-    ISNULL(OA.DisplayName,'''') DisplayName, ISNULL(Value,'''')Value      
-    from      [dbo].[OfferAttributes] OA      
-    Inner  join       
-    [dbo].[PlanAttributeMapping]  PA      
-    on OA.ID= PA.OfferAttributeID and OA.OfferId=@OfferguId      
-    and  PA.PlanId=@PlanguId      
-    INNER Join  SubscriptionAttributeValues SAV      
-    on SAV.PlanAttributeId= PA.PlanAttributeId      
-    and SAV.SubscriptionId=@SubscriptionId      
-    where OA.Isactive=1   and PA.IsEnabled=1    
-  
-  
-    -- Cursor Begin  
-    Declare @subscriptionContent VARCHAR(MAX)=''''  
-  
-    DECLARE   
-        @htmlLabel VARCHAR(MAX),   
-        @htmlValue   VARCHAR(MAX)  
-  
-    DECLARE cursor_html CURSOR  
-    FOR SELECT   
-            htmlLabel,   
-            HtmlValue  
-        FROM   
-            #Temp  
-  
-    OPEN cursor_html;  
-  
-    FETCH NEXT FROM cursor_html INTO   
-        @htmlLabel,   
-        @htmlValue;  
-  
-    WHILE @@FETCH_STATUS = 0  
-        BEGIN  
-         
-        set @subscriptionContent = @subscriptionContent + ''<tr><td><b>''+ @htmlLabel+''</b></td> <td>'' + @htmlValue + ''</td> </tr>''  
-  
-            FETCH NEXT FROM cursor_html INTO   
-                @htmlLabel,   
-        @htmlValue;  
-        END;  
-  
-    CLOSE cursor_html;  
-  
-    DEALLOCATE cursor_html;  
-  
-    -- Cursor End  
-  
-    -- Welcome text  
-  
-    IF (@processStatus =''failure'')  
-     BEGIN  
-      set @welcomeText= ''Your request for the subscription has been failed.''  
-      set @html = (SELECT TemplateBody FROM EmailTemplate WHERE Status = ''Failed'')
-     END  
-  
-    IF (@processStatus =''success'')   
-     BEGIN  
-     IF (@subscriptionStatus= ''PendingActivation'')  
-        BEGIN  
-      set @welcomeText= ''A request for purchase with the following details is awaiting your action for activation.''  
-       END  
-     IF (@subscriptionStatus= ''Subscribed'')  
-        BEGIN  
-      set @welcomeText= ''Your request for the purchase has been approved.''  
-       END  
-     IF (@subscriptionStatus= ''Unsubscribed'')  
-        BEGIN  
-      set @welcomeText= ''A subscription with the following details was deleted from Azure.''  
-       END   
-         set @html = (SELECT TemplateBody FROM EmailTemplate WHERE Status = @subscriptionStatus)
-    END  
- 
-     select  @html=REPLACE(@html,''${subscriptiondetails}'',@subscriptionContent)  
-      ,@html=REPLACE(@html,''${welcometext}'',@welcomeText)  
-      ,@html=REPLACE(@html,''${ApplicationName}'',@applicationName)  
-   
-  
-     select 1 AS ID,''Email'' AS [Name], @html as [Value]  
-  
-  
-    /* test values  
-     --select @subscriptionContent  
-     -- select * from #Temp  
-  
-    SELECT   
-      @subscriptionId    as ''subscriptionId''  
-    , @processStatus    as ''processStatus''  
-    , @planId       as ''planId''  
-    , @offerId       as ''offerId''  
-    , @offerGUId      as ''offerGUId''  
-    , @subscriptionStatus    as ''subscriptionStatus''  
-    , @subscriptionName    as ''subscriptionName''  
-    , @planName      as ''planName''  
-    , @offerName      as ''offerName''  
-    , @customerName      as ''customerName''  
-    , @customerEmailAddress   as ''customerEmailAddress''  
-    , @purchaserEmial      as ''purchaserEmial''  
-    , @purchaserTenant     as ''purchaserTenant''  
-    , @UserId       as ''UserId''  
-    , @applicationName    as ''applicationName''  
-    , @welcomeText     as ''welcomeText''  
-    , @tablehtml     as ''tablehtml''  
-    */  
-  
-    End
-')");
+                                CREATE OR REPLACE PROCEDURE spGetFormattedEmailBody(
+                                    IN p_subscription_id TEXT,
+                                    IN p_process_status TEXT
+                                ) 
+                                LANGUAGE plpgsql
+                                AS $$
+                                DECLARE
+                                    v_html TEXT;
+                                    v_plan_id TEXT;
+                                    v_plan_guid TEXT;
+                                    v_plan_name TEXT;
+                                    v_offer_id TEXT;
+                                    v_offer_guid TEXT;
+                                    v_subscription_status TEXT;
+                                    v_subscription_name TEXT;
+                                    v_offer_name TEXT;
+                                    v_customer_name TEXT;
+                                    v_customer_email_address TEXT;
+                                    v_purchaser_email TEXT;
+                                    v_purchaser_tenant TEXT;
+                                    v_user_id INT;
+                                    v_application_name TEXT;
+                                    v_welcome_text TEXT;
+                                    v_subscription_content TEXT DEFAULT '';    
+                                    rec RECORD;
+                                BEGIN
+                                    -- Fetch application name
+                                    SELECT value INTO v_application_name FROM applicationconfiguration WHERE name = 'ApplicationName';
+
+                                    -- Initialize welcome text
+                                    v_welcome_text := '';
+
+                                    -- Fetch subscription details
+                                    IF EXISTS (SELECT 1 FROM subscriptions WHERE ampsubscriptionid = p_subscription_id) THEN
+                                        SELECT 
+                                            ampplanid,
+                                            subscriptionstatus,
+                                            name,
+                                            purchaseremail,
+                                            purchasertenantid,
+                                            userid
+                                        INTO
+                                            v_plan_id,
+                                            v_subscription_status,
+                                            v_subscription_name,
+                                            v_purchaser_email,
+                                            v_purchaser_tenant,
+                                            v_user_id
+                                        FROM subscriptions
+                                        WHERE ampsubscriptionid = p_subscription_id;
+
+                                        -- Fetch customer details
+                                        SELECT fullname, emailaddress
+                                        INTO v_customer_name, v_customer_email_address
+                                        FROM users
+                                        WHERE userid = v_user_id;
+
+                                        -- Fetch plan details
+                                        IF EXISTS (SELECT 1 FROM plans WHERE planid = v_plan_id) THEN
+                                            SELECT offerid, displayname, planguid
+                                            INTO v_offer_guid, v_plan_name, v_plan_guid
+                                            FROM plans
+                                            WHERE planid = v_plan_id;
+
+                                            -- Fetch offer details
+                                            IF EXISTS (SELECT 1 FROM offers WHERE offerguid = v_offer_guid) THEN
+                                                SELECT offerid, offername
+                                                INTO v_offer_id, v_offer_name
+                                                FROM offers
+                                                WHERE offerguid = v_offer_guid;
+                                            END IF;
+                                        END IF;
+                                    END IF;
+
+                                    -- Create temporary table and insert values
+                                    CREATE TEMP TABLE temp_html (htmllabel TEXT, htmlvalue TEXT);
+                                    INSERT INTO temp_html (htmllabel, htmlvalue)
+                                    VALUES
+                                        ('Customer Email Address', v_customer_email_address),
+                                        ('Customer Name', v_customer_name),
+                                        ('SaaS Subscription Id', p_subscription_id),
+                                        ('SaaS Subscription Name', v_subscription_name),
+                                        ('SaaS Subscription Status', v_subscription_status),
+                                        ('Plan', v_plan_name),
+                                        ('Purchaser Email Address', v_purchaser_email),
+                                        ('Purchaser Tenant', v_purchaser_tenant);
+
+                                    -- Insert parameters
+                                    INSERT INTO temp_html (htmllabel, htmlvalue)
+                                    SELECT 
+                                        COALESCE(OA.displayname, ''),
+                                        COALESCE(SAV.value, '')
+                                    FROM offerattributes OA
+                                    INNER JOIN planattributemapping PA
+                                        ON OA.id = PA.offerattributeid AND OA.offerid = v_offer_guid AND PA.planid = v_plan_guid
+                                    INNER JOIN subscriptionattributevalues SAV
+                                        ON SAV.planattributeid = PA.planattributeid AND SAV.subscriptionid = p_subscription_id
+                                    WHERE OA.isactive = TRUE AND PA.isenabled = TRUE;
+
+                                    -- Iterate over the temporary table
+                                    FOR rec IN SELECT * FROM temp_html LOOP
+                                        v_subscription_content := v_subscription_content || '<tr><td><b>' || rec.htmllabel || '</b></td> <td>' || rec.htmlvalue || '</td> </tr>';
+                                    END LOOP;
+
+                                    -- Handle process status
+                                    IF p_process_status = 'failure' THEN
+                                        v_welcome_text := 'Your request for the subscription has failed.';
+                                        SELECT templatebody INTO v_html
+                                        FROM emailtemplate
+                                        WHERE status = 'Failed';
+                                    ELSIF p_process_status = 'success' THEN
+                                        IF v_subscription_status = 'PendingActivation' THEN
+                                            v_welcome_text := 'A request for purchase with the following details is awaiting your action for activation.';
+                                        ELSIF v_subscription_status = 'Subscribed' THEN
+                                            v_welcome_text := 'Your request for the purchase has been approved.';
+                                        ELSIF v_subscription_status = 'Unsubscribed' THEN
+                                            v_welcome_text := 'A subscription with the following details was deleted from Azure.';
+                                        END IF;
+                                        SELECT templatebody INTO v_html
+                                        FROM emailtemplate
+                                        WHERE status = v_subscription_status;
+                                    END IF;
+
+                                    -- Replace placeholders
+                                    v_html := REPLACE(v_html, '${subscriptiondetails}', v_subscription_content);
+                                    v_html := REPLACE(v_html, '${welcometext}', v_welcome_text);
+                                    v_html := REPLACE(v_html, '${ApplicationName}', v_application_name);
+
+                                    -- Return result
+                                    RAISE NOTICE 'Email Content: %', v_html;
+                                END;
+                                $$;
+                                ");
         }
 
         public static void BaselineV2_SeedData(this MigrationBuilder migrationBuilder)
         {
             var seedDate = DateTime.Now;
             migrationBuilder.Sql(@$"
-INSERT INTO ValueTypes
-    (ValueType,CreateDate,HTMLType)
-VALUES 
-    ('Int','{seedDate}','int'),
-    ('String','{seedDate}','string'),
-    ('Date','{seedDate}','date')
-");
+                                    INSERT INTO ""ValueTypes""
+                                        (""ValueType"",""CreateDate"",""HTMLType"")
+                                    VALUES 
+                                        ('Int','{seedDate}','int'),
+                                        ('String','{seedDate}','string'),
+                                        ('Date','{seedDate}','date')
+                                    ");
           
-            migrationBuilder.Sql(@$"INSERT INTO Roles (name) VALUES ('PublisherAdmin')");
+            migrationBuilder.Sql(@$"INSERT INTO ""Roles"" (""Name"") VALUES ('PublisherAdmin')");
 
             migrationBuilder.Sql(@$"
-INSERT INTO Events
-	(EventsName,IsActive,CreateDate)
-VALUES
-    ('Activate',1,'{seedDate}'),
-	('Unsubscribe',1,'{seedDate}'),
-	('Pending Activation',1,'{seedDate}')
-");
+                                    INSERT INTO ""Events""
+	                                    (""EventsName"",""IsActive"",""CreateDate"")
+                                    VALUES
+                                        ('Activate',true,'{seedDate}'),
+	                                    ('Unsubscribe',true,'{seedDate}'),
+	                                    ('Pending Activation',true,'{seedDate}')
+                                    ");
 
             migrationBuilder.Sql(@$"
-INSERT INTO ApplicationConfiguration
-	([Name],[Value],[Description])
-VALUES
-    ('SMTPFromEmail','','SMTP Email'),
-	('SMTPPassword','','SMTP Password'),
-	('SMTPHost','','SMTP Host'),
-	('SMTPPort','','SMTP Port'),
-	('SMTPUserName','','SMTP User Name'),
-	('SMTPSslEnabled','','SMTP Ssl Enabled'),
-	('ApplicationName','Contoso','Application Name'),
-	('IsEmailEnabledForSubscriptionActivation','true','Active Email Enabled'),
-	('IsEmailEnabledForUnsubscription','true','Unsubscribe Email Enabled'),
-	('IsAutomaticProvisioningSupported','false','Skip Activation - Automatic Provisioning Supported'),
-	('IsEmailEnabledForPendingActivation','false','Email Enabled For Pending Activation')
-");
+                                    INSERT INTO ""ApplicationConfiguration""
+	                                    (""Name"",""Value"",""Description"")
+                                    VALUES
+                                        ('SMTPFromEmail','','SMTP Email'),
+	                                    ('SMTPPassword','','SMTP Password'),
+	                                    ('SMTPHost','','SMTP Host'),
+	                                    ('SMTPPort','','SMTP Port'),
+	                                    ('SMTPUserName','','SMTP User Name'),
+	                                    ('SMTPSslEnabled','','SMTP Ssl Enabled'),
+	                                    ('ApplicationName','Contoso','Application Name'),
+	                                    ('IsEmailEnabledForSubscriptionActivation','true','Active Email Enabled'),
+	                                    ('IsEmailEnabledForUnsubscription','true','Unsubscribe Email Enabled'),
+	                                    ('IsAutomaticProvisioningSupported','false','Skip Activation - Automatic Provisioning Supported'),
+	                                    ('IsEmailEnabledForPendingActivation','false','Email Enabled For Pending Activation')
+                                    ");
             
+            migrationBuilder.Sql(@$"   
+                                    INSERT INTO ""ApplicationConfiguration"" (""Name"", ""Value"", ""Description"")
+                                    SELECT 'AcceptSubscriptionUpdates', 'false', 'Accepts subscriptions plan or quantity updates'
+                                    WHERE NOT EXISTS (SELECT 1 FROM ""ApplicationConfiguration"" WHERE ""Name"" = 'AcceptSubscriptionUpdates');
+
+                                    INSERT INTO ""ApplicationConfiguration"" (""Name"", ""Value"", ""Description"")
+                                    SELECT 'LogoFile', '', 'Logo File'
+                                    WHERE NOT EXISTS (SELECT 1 FROM ""ApplicationConfiguration"" WHERE ""Name"" = 'LogoFile');
+
+                                    INSERT INTO ""ApplicationConfiguration"" (""Name"", ""Value"", ""Description"")
+                                    SELECT 'FaviconFile', '', 'Favicon File'
+                                    WHERE NOT EXISTS (SELECT 1 FROM ""ApplicationConfiguration"" WHERE ""Name"" = 'FaviconFile');
+
+                                    ");
             migrationBuilder.Sql(@$"
-IF NOT EXISTS (SELECT * FROM ApplicationConfiguration WHERE Name = 'AcceptSubscriptionUpdates')
-BEGIN
-    INSERT INTO ApplicationConfiguration (Name,Value,Description)
-    VALUES ('AcceptSubscriptionUpdates','false','Accepts subscriptions plan or quantity updates')
-END
-GO
-IF NOT EXISTS (SELECT * FROM ApplicationConfiguration WHERE Name = 'LogoFile')
-BEGIN
-    INSERT INTO ApplicationConfiguration (Name,Value,Description)
-    VALUES ('LogoFile','','Logo File')
-END
-GO
-IF NOT EXISTS (SELECT * FROM ApplicationConfiguration WHERE Name = 'FaviconFile')
-BEGIN
-    INSERT INTO ApplicationConfiguration (Name,Value,Description)
-    VALUES ('FaviconFile','','Favicon File')
-END
-GO
-");
-            migrationBuilder.Sql(@$"
-INSERT INTO EmailTemplate
-	([Status],[Description],[InsertDate],[TemplateBody],[Subject],[IsActive])
-VALUES
-    ('Failed','Failed','{seedDate}', '{FAILED_EMAIL_TEMPLATE}','Failed',1),
-	('PendingActivation','Pending Activation','{seedDate}', '{PENDINGACTIVATION_EMAIL_TEMPLATE}','Pending Activation',1),
-	('Subscribed','Subscribed','{seedDate}', '{SUBSCRIBED_EMAIL_TEMPLATE}','Subscribed',1),
-	('Unsubscribed','Unsubscribed','{seedDate}', '{UNSUBSCRIBED_EMAIL_TEMPLATE}','Unsubscribed',1)
-");
+                                INSERT INTO ""EmailTemplate""
+	                                (""Status"",""Description"",""InsertDate"",""TemplateBody"",""Subject"",""IsActive"")
+                                VALUES
+                                    ('Failed','Failed','{seedDate}', '{FAILED_EMAIL_TEMPLATE}','Failed',true),
+	                                ('PendingActivation','Pending Activation','{seedDate}', '{PENDINGACTIVATION_EMAIL_TEMPLATE}','Pending Activation',true),
+	                                ('Subscribed','Subscribed','{seedDate}', '{SUBSCRIBED_EMAIL_TEMPLATE}','Subscribed',true),
+	                                ('Unsubscribed','Unsubscribed','{seedDate}', '{UNSUBSCRIBED_EMAIL_TEMPLATE}','Unsubscribed',true)
+                                ");
 
         }
 

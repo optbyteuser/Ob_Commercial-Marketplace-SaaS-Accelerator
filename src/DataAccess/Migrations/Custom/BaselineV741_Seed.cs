@@ -13,23 +13,22 @@ namespace Marketplace.SaaS.Accelerator.DataAccess.Migrations.Custom
         public static void BaselineV741_SeedData(this MigrationBuilder migrationBuilder)
         {
             var seedDate = DateTime.Now;
-            migrationBuilder.Sql(@$"
-                    IF NOT EXISTS (SELECT * FROM [dbo].[ApplicationConfiguration] WHERE [Name] = 'IsMeteredBillingEnabled')
-                    BEGIN
-                        INSERT [dbo].[ApplicationConfiguration] ( [Name], [Value], [Description]) VALUES ( N'IsMeteredBillingEnabled', N'true', N'Enable Metered Billing Feature')
-                    END
-                GO");
+            migrationBuilder.Sql(@$"                                                  
+                                INSERT INTO ""ApplicationConfiguration"" (""Name"", ""Value"", ""Description"")
+                                SELECT 'IsMeteredBillingEnabled', 'true', 'Enable Metered Billing Feature'
+                                WHERE NOT EXISTS (
+                                    SELECT * FROM ""ApplicationConfiguration""
+                                    WHERE ""Name"" = 'IsMeteredBillingEnabled'
+                                );
+                                ");
         }
 
         public static void BaselineV741_DeSeedData(this MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@$"
-
-                IF EXISTS (SELECT * FROM [dbo].[ApplicationConfiguration] WHERE [Name] = 'IsMeteredBillingEnabled')
-                BEGIN
-                    DELETE FROM [dbo].[ApplicationConfiguration]  WHERE [Name] = 'IsMeteredBillingEnabled'
-                END
-                GO");
+            migrationBuilder.Sql(@$"               
+                            DELETE FROM ""ApplicationConfiguration""
+                            WHERE ""Name"" = 'IsMeteredBillingEnabled';
+                            ");
         }
     }
 }

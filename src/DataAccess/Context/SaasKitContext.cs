@@ -65,7 +65,7 @@ public partial class SaasKitContext : DbContext
 
         modelBuilder.Entity<ApplicationLog>(entity =>
         {
-            entity.Property(e => e.ActionTime).HasColumnType("datetime");
+            entity.Property(e => e.ActionTime).HasColumnType("timestamp");
 
             entity.Property(e => e.LogDetail)
                 .HasMaxLength(4000)
@@ -80,7 +80,7 @@ public partial class SaasKitContext : DbContext
 
             entity.Property(e => e.CreateBy).HasMaxLength(100);
 
-            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+            entity.Property(e => e.CreateDate).HasColumnType("timestamp");
 
             entity.Property(e => e.Id)
                 .HasColumnName("ID")
@@ -107,7 +107,7 @@ public partial class SaasKitContext : DbContext
                 .HasMaxLength(1000)
                 .IsUnicode(false);
 
-            entity.Property(e => e.InsertDate).HasColumnType("datetime");
+            entity.Property(e => e.InsertDate).HasColumnType("timestamp");
 
             entity.Property(e => e.Status)
                 .HasMaxLength(1000)
@@ -126,7 +126,7 @@ public partial class SaasKitContext : DbContext
 
         modelBuilder.Entity<Events>(entity =>
         {
-            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+            entity.Property(e => e.CreateDate).HasColumnType("timestamp");
 
             entity.Property(e => e.EventsName)
                 .HasMaxLength(225)
@@ -151,7 +151,7 @@ public partial class SaasKitContext : DbContext
 
         modelBuilder.Entity<MeteredAuditLogs>(entity =>
         {
-            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.CreatedDate).HasColumnType("timestamp");
 
             entity.Property(e => e.RequestJson)
                 .HasMaxLength(500)
@@ -169,7 +169,7 @@ public partial class SaasKitContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false);
 
-            entity.Property(e => e.SubscriptionUsageDate).HasColumnType("datetime");
+            entity.Property(e => e.SubscriptionUsageDate).HasColumnType("timestamp");
 
             entity.HasOne(d => d.Subscription)
                 .WithMany(p => p.MeteredAuditLogs)
@@ -179,7 +179,7 @@ public partial class SaasKitContext : DbContext
 
         modelBuilder.Entity<MeteredDimensions>(entity =>
         {
-            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.CreatedDate).HasColumnType("timestamp");
 
             entity.Property(e => e.Description)
                 .HasMaxLength(250)
@@ -203,7 +203,7 @@ public partial class SaasKitContext : DbContext
         {
             entity.Property(e => e.Id).HasColumnName("ID");
 
-            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+            entity.Property(e => e.CreateDate).HasColumnType("timestamp");
 
             entity.Property(e => e.Description)
                 .HasMaxLength(225)
@@ -226,7 +226,7 @@ public partial class SaasKitContext : DbContext
 
         modelBuilder.Entity<Offers>(entity =>
         {
-            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+            entity.Property(e => e.CreateDate).HasColumnType("timestamp");
 
             entity.Property(e => e.OfferGuid).HasColumnName("OfferGUId");
 
@@ -244,7 +244,7 @@ public partial class SaasKitContext : DbContext
             entity.HasKey(e => e.PlanAttributeId)
                 .HasName("PK__PlanAttr__8B476A98C058FAF2");
 
-            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+            entity.Property(e => e.CreateDate).HasColumnType("timestamp");
 
             entity.Property(e => e.OfferAttributeId).HasColumnName("OfferAttributeID");
         });
@@ -268,7 +268,7 @@ public partial class SaasKitContext : DbContext
 
         modelBuilder.Entity<PlanEventsMapping>(entity =>
         {
-            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+            entity.Property(e => e.CreateDate).HasColumnType("timestamp");
 
             entity.Property(e => e.FailureStateEmails)
                 .HasMaxLength(225)
@@ -332,7 +332,7 @@ public partial class SaasKitContext : DbContext
         {
             entity.Property(e => e.Id).HasColumnName("ID");
 
-            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+            entity.Property(e => e.CreateDate).HasColumnType("timestamp");
 
             entity.Property(e => e.OfferId).HasColumnName("OfferID");
 
@@ -349,7 +349,7 @@ public partial class SaasKitContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false);
 
-            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+            entity.Property(e => e.CreateDate).HasColumnType("timestamp");
 
             entity.Property(e => e.NewValue).IsUnicode(false);
 
@@ -385,7 +385,7 @@ public partial class SaasKitContext : DbContext
 
             entity.Property(e => e.RowNumber).ValueGeneratedNever();
 
-            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+            entity.Property(e => e.CreateDate).HasColumnType("timestamp");
 
             entity.Property(e => e.DisplayName)
                 .IsRequired()
@@ -431,11 +431,11 @@ public partial class SaasKitContext : DbContext
 
             entity.Property(e => e.AmpsubscriptionId)
                 .HasColumnName("AMPSubscriptionId")
-                .HasDefaultValueSql("(newid())");
+                .HasDefaultValueSql("(uuid_generate_v4())");
 
-            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+            entity.Property(e => e.CreateDate).HasColumnType("timestamp");
 
-            entity.Property(e => e.ModifyDate).HasColumnType("datetime");
+            entity.Property(e => e.ModifyDate).HasColumnType("timestamp");
 
             entity.Property(e => e.Name)
                 .HasMaxLength(100)
@@ -463,7 +463,7 @@ public partial class SaasKitContext : DbContext
         {
             entity.HasKey(e => e.UserId);
 
-            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.CreatedDate).HasColumnType("timestamp");
 
             entity.Property(e => e.EmailAddress)
                 .HasMaxLength(100)
@@ -479,7 +479,7 @@ public partial class SaasKitContext : DbContext
             entity.HasKey(e => e.ValueTypeId)
                 .HasName("PK__ValueTyp__A51E9C5AEA096123");
 
-            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+            entity.Property(e => e.CreateDate).HasColumnType("timestamp");
 
             entity.Property(e => e.Htmltype)
                 .HasColumnName("HTMLType")
@@ -497,7 +497,7 @@ public partial class SaasKitContext : DbContext
 
             entity.Property(e => e.Description).IsUnicode(false);
 
-            entity.Property(e => e.InsertDate).HasColumnType("datetime");
+            entity.Property(e => e.InsertDate).HasColumnType("timestamp");
 
             entity.Property(e => e.SubscriptionStatus)
                 .HasMaxLength(225)
