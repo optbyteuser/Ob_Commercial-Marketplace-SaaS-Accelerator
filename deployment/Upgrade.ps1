@@ -37,10 +37,10 @@ $ConnectionString = az keyvault secret show `
 	--output tsv
 
 #Extract components from ConnectionString since Invoke-Sqlcmd needs them separately
-$Server = String-Between -source $ConnectionString -start "Data Source=" -end ";"
-$Database = String-Between -source $ConnectionString -start "Initial Catalog=" -end ";"
-$User = String-Between -source $ConnectionString -start "User Id=" -end ";"
-$Pass = String-Between -source $ConnectionString -start "Password=" -end ";"
+$Server = ($ConnectionString -split "Host=")[1] -split " ")[0]
+$Database = ($ConnectionString -split "Database=")[1] -split " ")[0]
+$User = ($ConnectionString -split "User Id=")[1] -split " ")[0]
+$Pass = ($ConnectionString -split "Password=")[1] -split " ")[0]
 
 Write-host "## Retrieved ConnectionString from KeyVault"
 Set-Content -Path ../src/AdminSite/appsettings.Development.json -value "{`"ConnectionStrings`": {`"DefaultConnection`":`"$ConnectionString`"}}"
@@ -54,42 +54,71 @@ dotnet-ef migrations script `
 	
 Write-host "## Generated migration script"	
 
-Write-host "## !!!Attempting to upgrade database to migration compatibility.!!!"	
-$compatibilityScript = "
-IF OBJECT_ID(N'[__EFMigrationsHistory]') IS NULL 
--- No __EFMigrations table means Database has not been upgraded to support EF Migrations
+Write-host "## !!!Attempting to upgrade database to migration compatibility.!!!"
+# Import the Npgsql module
+Import-Module -Name Npgsql
+
+$compatibilityScript = @"
+DO $$ 
 BEGIN
-    CREATE TABLE [__EFMigrationsHistory] (
-        [MigrationId] nvarchar(150) NOT NULL,
-        [ProductVersion] nvarchar(32) NOT NULL,
-        CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId])
-    );
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '__EFMigrationsHistory') THEN
+        -- No __EFMigrations table means Database has not been upgraded to support EF Migrations
+        CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+            "MigrationId" TEXT NOT NULL,
+            "ProductVersion" TEXT NOT NULL,
+            PRIMARY KEY ("MigrationId")
+        );
 
-    IF (SELECT TOP 1 VersionNumber FROM DatabaseVersionHistory ORDER BY CreateBy DESC) = '2.10'
-	    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion]) 
-	        VALUES (N'20221118045814_Baseline_v2', N'6.0.1');
+        IF (SELECT VersionNumber FROM DatabaseVersionHistory ORDER BY CreateBy DESC LIMIT 1) = '2.10' THEN
+            INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion") 
+            VALUES ('20221118045814_Baseline_v2', '6.0.1');
+        END IF;
 
-    IF (SELECT TOP 1 VersionNumber FROM DatabaseVersionHistory ORDER BY CreateBy DESC) = '5.00'
-	    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])  
-	        VALUES (N'20221118045814_Baseline_v2', N'6.0.1'), (N'20221118203340_Baseline_v5', N'6.0.1');
+        IF (SELECT VersionNumber FROM DatabaseVersionHistory ORDER BY CreateBy DESC LIMIT 1) = '5.00' THEN
+            INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")  
+            VALUES ('20221118045814_Baseline_v2', '6.0.1'), ('20221118203340_Baseline_v5', '6.0.1');
+        END IF;
 
-    IF (SELECT TOP 1 VersionNumber FROM DatabaseVersionHistory ORDER BY CreateBy DESC) = '6.10'
-	    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])  
-	        VALUES (N'20221118045814_Baseline_v2', N'6.0.1'), (N'20221118203340_Baseline_v5', N'6.0.1'), (N'20221118211554_Baseline_v6', N'6.0.1');
-END;
-GO"
+        IF (SELECT VersionNumber FROM DatabaseVersionHistory ORDER BY CreateBy DESC LIMIT 1) = '6.10' THEN
+            INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")  
+            VALUES ('20221118045814_Baseline_v2', '6.0.1'), ('20221118203340_Baseline_v5', '6.0.1'), ('20221118211554_Baseline_v6', '6.0.1');
+        END IF;
+    END IF;
+END $$;
+"@
 
-Invoke-Sqlcmd -query $compatibilityScript -ServerInstance $Server -database $Database -Username $User -Password $Pass
+# Create a Npgsql connection object
+$connection = New-Object Npgsql.NpgsqlConnection($ConnectionString)
+
+# Open the connection
+$connection.Open()
+
+# Create a Npgsql command object
+$command = New-Object Npgsql.NpgsqlCommand($compatibilityScript, $connection)
+
+# Execute the script
+$command.ExecuteNonQuery()
+
 Write-host "## Ran compatibility script against database"
-Invoke-Sqlcmd -inputFile script.sql -ServerInstance $Server -database $Database -Username $User -Password $Pass
+
+# Read the SQL script content
+$sqlScriptPath = "script.sql"
+$sqlScriptContent = Get-Content -Path $sqlScriptPath -Raw
+
+# Create a Npgsql command object for the main SQL script content
+$command = New-Object Npgsql.NpgsqlCommand($sqlScriptContent, $connection)
+
+# Execute the script
+$command.ExecuteNonQuery()
+
+# Close the connection
+$connection.Close()
+
 Write-host "## Ran migration against database"	
 
 Remove-Item -Path ../src/AdminSite/appsettings.Development.json
 Remove-Item -Path script.sql
-Write-host "#### Database Deployment complete ####"	
-
-
-
+Write-host "#### Database Deployment complete ####"
 Write-host "#### Deploying new code ####" 
 
 dotnet publish ../src/AdminSite/AdminSite.csproj -v q -c release -o ../Publish/AdminSite/
