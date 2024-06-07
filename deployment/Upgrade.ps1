@@ -39,10 +39,10 @@ $ConnectionString = az keyvault secret show `
 
 Write-host "## Retrieved ConnectionString from KeyVault"
 # Extract connection parameters
-$Host = ($ConnectionString -split ";")[0] -split "=")[-1]
-$Database = ($ConnectionString -split ";")[1] -split "=")[-1]
-$User = ($ConnectionString -split ";")[3] -split "=")[-1]
-$Pass = ($ConnectionString -split ";")[4] -split "=")[-1]
+$Host = (($ConnectionString -split ";")[0] -split "=")[-1]
+$Database = (($ConnectionString -split ";")[1] -split "=")[-1]
+$User = (($ConnectionString -split ";")[3] -split "=")[-1]
+$Pass = (($ConnectionString -split ";")[4] -split "=")[-1]
 
 Write-Output $ConnectionString
 Set-Content -Path ../src/AdminSite/appsettings.Development.json -value "{`"ConnectionStrings`": {`"DefaultConnection`":`"$ConnectionString`"}}"
