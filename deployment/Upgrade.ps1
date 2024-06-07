@@ -36,10 +36,14 @@ $ConnectionString = az keyvault secret show `
 	--query "{value:value}" `
 	--output tsv
 
-# Append Timeout parameter
-$ConnectionString += ";Timeout=30"
 
 Write-host "## Retrieved ConnectionString from KeyVault"
+# Extract connection parameters
+$Host = ($ConnectionString -split ";")[0] -split "=")[-1]
+$Database = ($ConnectionString -split ";")[1] -split "=")[-1]
+$User = ($ConnectionString -split ";")[3] -split "=")[-1]
+$Pass = ($ConnectionString -split ";")[4] -split "=")[-1]
+
 Write-Output $ConnectionString
 Set-Content -Path ../src/AdminSite/appsettings.Development.json -value "{`"ConnectionStrings`": {`"DefaultConnection`":`"$ConnectionString`"}}"
 
@@ -53,8 +57,6 @@ dotnet-ef migrations script `
 Write-host "## Generated migration script"	
 
 Write-host "## !!!Attempting to upgrade database to migration compatibility.!!!"
-# Load the Npgsql assembly
-Add-Type -Path "$HOME/Npgsql/npgsql-4.0.16/npgsql-4.0.16/src/Npgsql/bin/Debug/net45/Npgsql.dll"
 
 $compatibilityScript = @"
 DO $$ 
@@ -86,10 +88,10 @@ END $$;
 "@
 
 # Execute compatibility script against database
-psql --host="optbytepsql.postgres.database.azure.com" --port=5432 --username="optpsql" --dbname="saasaccelerat-obwfonboard" --command="$compatibilityScript"
+psql --host=$Host --port=5432 --username=$User  --dbname=$Database  --command="$compatibilityScript"
 
 # Execute migration script against database
-psql --host="optbytepsql.postgres.database.azure.com" --port=5432 --username="optpsql" --dbname="saasaccelerat-obwfonboard" --file="script.sql"
+psql -host=$Host --port=5432 --username=$User  --dbname=$Database  --file="$Home/script.sql"
 
 Write-host "## Ran migration against database"	
 
