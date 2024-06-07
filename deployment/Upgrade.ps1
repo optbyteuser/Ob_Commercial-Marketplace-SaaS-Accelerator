@@ -88,10 +88,10 @@ END $$;
 "@
 
 # Execute compatibility script against database
-psql --host=$host1 --port=5432 --username=$User  --dbname=$Database  --command="$compatibilityScript"
+psql --host="optbytepsql.postgres.database.azure.com" --port=5432 --username=$User  --dbname=$Database  --command="$compatibilityScript"
 
 # Execute migration script against database
-psql -host=$host1 --port=5432 --username=$User  --dbname=$Database  --file="$Home/script.sql"
+psql -host="optbytepsql.postgres.database.azure.com" --port=5432 --username=$User  --dbname=$Database  --file="$Home/script.sql"
 
 Write-host "## Ran migration against database"	
 
