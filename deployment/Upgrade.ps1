@@ -36,6 +36,8 @@ $ConnectionString = az keyvault secret show `
 	--query "{value:value}" `
 	--output tsv
 
+# Append Timeout parameter
+$ConnectionString += ";Timeout=30"
 
 Write-host "## Retrieved ConnectionString from KeyVault"
 Write-Output $ConnectionString
