@@ -85,40 +85,11 @@ BEGIN
 END $$;
 "@
 
-# Create a Npgsql connection object
-$connection = New-Object Npgsql.NpgsqlConnection($ConnectionString)
+# Execute compatibility script against database
+psql --host="optbytepsql.postgres.database.azure.com" --port=5432 --username="optpsql" --dbname="saasaccelerat-obwfonboard" --command="$compatibilityScript"
 
-Write-host "##Connection Created Successfully"
-Write-Output $connection
-
-# Open the connection
-$connection.Open()
-
-Write-host "##Connection Opened Successfully"
-
-# Create a Npgsql command object
-$command = New-Object Npgsql.NpgsqlCommand($compatibilityScript, $connection)
-
-Write-host "##Command created Successfully"
-Write-Output $command 
-
-# Execute the script
-$command.ExecuteNonQuery()
-
-Write-host "## Ran compatibility script against database"
-
-# Read the SQL script content
-$sqlScriptPath = "script.sql"
-$sqlScriptContent = Get-Content -Path $sqlScriptPath -Raw
-
-# Create a Npgsql command object for the main SQL script content
-$command = New-Object Npgsql.NpgsqlCommand($sqlScriptContent, $connection)
-
-# Execute the script
-$command.ExecuteNonQuery()
-
-# Close the connection
-$connection.Close()
+# Execute migration script against database
+psql --host="optbytepsql.postgres.database.azure.com" --port=5432 --username="optpsql" --dbname="saasaccelerat-obwfonboard" --file="script.sql"
 
 Write-host "## Ran migration against database"	
 
