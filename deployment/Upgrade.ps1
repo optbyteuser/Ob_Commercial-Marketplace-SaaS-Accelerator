@@ -38,6 +38,7 @@ $ConnectionString = az keyvault secret show `
 
 
 Write-host "## Retrieved ConnectionString from KeyVault"
+Write-Output $ConnectionString
 Set-Content -Path ../src/AdminSite/appsettings.Development.json -value "{`"ConnectionStrings`": {`"DefaultConnection`":`"$ConnectionString`"}}"
 
 dotnet-ef migrations script `
@@ -84,6 +85,9 @@ END $$;
 
 # Create a Npgsql connection object
 $connection = New-Object Npgsql.NpgsqlConnection($ConnectionString)
+
+Write-host "##Connection Created Successfully"
+Write-Output $connection
 
 # Open the connection
 $connection.Open()
