@@ -50,8 +50,8 @@ dotnet-ef migrations script `
 Write-host "## Generated migration script"	
 
 Write-host "## !!!Attempting to upgrade database to migration compatibility.!!!"
-# Import the Npgsql module
-Import-Module -Name Npgsql
+# Load the Npgsql assembly
+Add-Type -Path "$PWD/Npgsql/npgsql-4.0.16/npgsql-4.0.16/src/Npgsql/bin/Debug/net45/Npgsql.dll"
 
 $compatibilityScript = @"
 DO $$ 
