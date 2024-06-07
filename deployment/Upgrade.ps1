@@ -92,8 +92,13 @@ Write-Output $connection
 # Open the connection
 $connection.Open()
 
+Write-host "##Connection Opened Successfully"
+
 # Create a Npgsql command object
 $command = New-Object Npgsql.NpgsqlCommand($compatibilityScript, $connection)
+
+Write-host "##Command created Successfully"
+Write-Output $command 
 
 # Execute the script
 $command.ExecuteNonQuery()
