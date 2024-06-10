@@ -39,10 +39,21 @@ $ConnectionString = az keyvault secret show `
 
 Write-host "## Retrieved ConnectionString from KeyVault"
 # Extract connection parameters
-$host1 = (($ConnectionString -split ";")[0] -split "=")[-1]
-$Database = (($ConnectionString -split ";")[1] -split "=")[-1]
-$User = (($ConnectionString -split ";")[3] -split "=")[-1]
-$Pass = (($ConnectionString -split ";")[4] -split "=")[-1]
+$dbHost  = (($ConnectionString -split ";")[0] -split "=")[-1]
+$port = 5432
+$database = (($ConnectionString -split ";")[1] -split "=")[-1]
+$user = (($ConnectionString -split ";")[3] -split "=")[-1]
+$password = (($ConnectionString -split ";")[4] -split "=")[-1]
+
+Write-Output "##Parameters"
+
+Write-Output $dbHost   
+
+Write-Output $port 
+
+Write-Output $database 
+
+Write-Output $password 
 
 Write-Output $ConnectionString
 Set-Content -Path ../src/AdminSite/appsettings.Development.json -value "{`"ConnectionStrings`": {`"DefaultConnection`":`"$ConnectionString`"}}"
@@ -88,10 +99,10 @@ END $$;
 "@
 
 # Execute compatibility script against database
-psql --host=$host1 --port=5432 --username=$User --dbname=$Database --command="$compatibilityScript"
+psql --host=$dbHost  --port=$port --username=$user --dbname=$database --command="$compatibilityScript"
 
 # Execute migration script against database
-psql --host=$host1 --port=5432 --username=$User --dbname=$Database --file="$Home/script.sql"
+psql --host=$dbHost  --port=$port --username=$user --dbname=$database --file="$Home/script.sql"
 
 Write-host "## Ran migration against database"	
 
