@@ -39,7 +39,7 @@ $ConnectionString = az keyvault secret show `
 
 Write-host "## Retrieved ConnectionString from KeyVault"
 # Extract connection parameters
-$host = (($ConnectionString -split ";")[0] -split "=")[-1]
+$host1 = (($ConnectionString -split ";")[0] -split "=")[-1]
 $Database = (($ConnectionString -split ";")[1] -split "=")[-1]
 $User = (($ConnectionString -split ";")[3] -split "=")[-1]
 $Pass = (($ConnectionString -split ";")[4] -split "=")[-1]
@@ -88,10 +88,10 @@ END $$;
 "@
 
 # Execute compatibility script against database
-psql --host=$host --port=5432 --username=$User --dbname=$Database --command="$compatibilityScript"
+psql --host=$host1 --port=5432 --username=$User --dbname=$Database --command="$compatibilityScript"
 
 # Execute migration script against database
-psql --host=$host --port=5432 --username=$User --dbname=$Database --file="$Home/script.sql"
+psql --host=$host1 --port=5432 --username=$User --dbname=$Database --file="$Home/script.sql"
 
 Write-host "## Ran migration against database"	
 
