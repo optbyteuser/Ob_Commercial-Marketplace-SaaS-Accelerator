@@ -70,14 +70,14 @@ Write-host "## Generated migration script"
 Write-host "## !!!Attempting to upgrade database to migration compatibility.!!!"
 
 $compatibilityScript = @"
-DO $$ 
+DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '__EFMigrationsHistory') THEN
         -- No __EFMigrations table means Database has not been upgraded to support EF Migrations
         CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
             "MigrationId" TEXT NOT NULL,
             "ProductVersion" TEXT NOT NULL,
-            PRIMARY KEY ("MigrationId")
+            CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
         );
 
         IF (SELECT VersionNumber FROM DatabaseVersionHistory ORDER BY CreateBy DESC LIMIT 1) = '2.10' THEN
