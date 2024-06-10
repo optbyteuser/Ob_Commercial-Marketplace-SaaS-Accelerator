@@ -40,8 +40,8 @@ $ConnectionString = az keyvault secret show `
 Write-host "## Retrieved ConnectionString from KeyVault"
 # Extract connection parameters
 $dbHost  = (($ConnectionString -split ";")[0] -split "=")[-1]
-$port = 5432
-$database = (($ConnectionString -split ";")[1] -split "=")[-1]
+$port = (($ConnectionString -split ";")[1] -split "=")[-1]
+$database = (($ConnectionString -split ";")[2] -split "=")[-1]
 $user = (($ConnectionString -split ";")[3] -split "=")[-1]
 $password = (($ConnectionString -split ";")[4] -split "=")[-1]
 
