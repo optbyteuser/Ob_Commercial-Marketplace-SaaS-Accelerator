@@ -70,12 +70,7 @@ Write-host "## Generated migration script"
 Write-host "## !!!Attempting to upgrade database to migration compatibility.!!!"
 
 $compatibilityScript = @"
-DO $$
-DECLARE
-    result INT;
-BEGIN
     SELECT 1 INTO result;
-END $$;
 "@
 
 # Execute compatibility script against database
