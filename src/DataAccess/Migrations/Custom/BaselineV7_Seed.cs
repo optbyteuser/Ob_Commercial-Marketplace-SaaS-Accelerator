@@ -14,7 +14,7 @@ namespace Marketplace.SaaS.Accelerator.DataAccess.Migrations.Custom
         {
             var seedDate = DateTime.Now;
             migrationBuilder.Sql(@$"
-                                Select * from ""ApplicationConfiguration"";
+                                Select * from public.""ApplicationConfiguration"";
                                 ");
         }
 
