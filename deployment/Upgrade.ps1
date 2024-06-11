@@ -70,32 +70,32 @@ Write-host "## Generated migration script"
 Write-host "## !!!Attempting to upgrade database to migration compatibility.!!!"
 
 $compatibilityScript = @"
-IF OBJECT_ID('[__EFMigrationsHistory]') IS NULL 
-THEN    
-    CREATE TABLE __EFMigrationsHistory (
-        MigrationId varchar(150) NOT NULL,
-        ProductVersion varchar(32) NOT NULL,
-        CONSTRAINT PK___EFMigrationsHistory PRIMARY KEY (MigrationId)
-    );
-
-    IF (SELECT VersionNumber FROM DatabaseVersionHistory ORDER BY CreateBy DESC
-LIMIT 1) = '2.10' THEN	    
-    	INSERT INTO __EFMigrationsHistory (MigrationId, ProductVersion) 
-	        VALUES ('20221118045814_Baseline_v2', '6.0.1');
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '__EFMigrationsHistory') THEN
+        -- No __EFMigrations table means Database has not been upgraded to support EF Migrations
+        CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+            "MigrationId" TEXT NOT NULL,
+            "ProductVersion" TEXT NOT NULL,
+            CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
+        );
     END IF;
 
-    IF (SELECT VersionNumber FROM DatabaseVersionHistory ORDER BY CreateBy DESC
-LIMIT 1) = '5.00' THEN	   
-    	INSERT INTO __EFMigrationsHistory (MigrationId, ProductVersion)  
-	        VALUES ('20221118045814_Baseline_v2', '6.0.1'), ('20221118203340_Baseline_v5', '6.0.1');
+    IF (SELECT VersionNumber FROM DatabaseVersionHistory ORDER BY CreateBy DESC LIMIT 1) = '2.10' THEN
+        INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion") 
+        VALUES ('20221118045814_Baseline_v2', '6.0.1');
     END IF;
 
-    IF (SELECT VersionNumber FROM DatabaseVersionHistory ORDER BY CreateBy DESC
-LIMIT 1) = '6.10' THEN	   
-    	INSERT INTO __EFMigrationsHistory (MigrationId, ProductVersion)  
-	        VALUES ('20221118045814_Baseline_v2', '6.0.1'), ('20221118203340_Baseline_v5', '6.0.1'), ('20221118211554_Baseline_v6', '6.0.1');
+    IF (SELECT VersionNumber FROM DatabaseVersionHistory ORDER BY CreateBy DESC LIMIT 1) = '5.00' THEN
+        INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")  
+        VALUES ('20221118045814_Baseline_v2', '6.0.1'), ('20221118203340_Baseline_v5', '6.0.1');
     END IF;
-END IF;
+
+    IF (SELECT VersionNumber FROM DatabaseVersionHistory ORDER BY CreateBy DESC LIMIT 1) = '6.10' THEN
+        INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")  
+        VALUES ('20221118045814_Baseline_v2', '6.0.1'), ('20221118203340_Baseline_v5', '6.0.1'), ('20221118211554_Baseline_v6', '6.0.1');
+    END IF;
+END $$;
 "@
 
 # Execute compatibility script against database
