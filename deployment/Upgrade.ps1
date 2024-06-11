@@ -63,10 +63,10 @@ dotnet-ef migrations script `
     --context SaaSKitContext `
     --project ../src/DataAccess/DataAccess.csproj `
     --startup-project ../src/AdminSite/AdminSite.csproj `
-    --output deployment/script.sql
+    --output script.sql
 	
 	# Check if the path exists
-$outputPath = Resolve-Path "../deployment/script.sql"
+$outputPath = Resolve-Path "script.sql"
 if (Test-Path $outputPath) {
     Write-Host "Output file exists at: $outputPath"
 } else {
