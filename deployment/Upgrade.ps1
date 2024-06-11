@@ -69,7 +69,7 @@ Write-host "## Generated migration script"
 
 Write-host "## !!!Attempting to upgrade database to migration compatibility.!!!"
 
-$compatibilityScript = $(cat << EOF
+compatibilityScript = $(cat << EOF
 CREATE OR REPLACE FUNCTION upgrade_database() RETURNS VOID AS '
 DECLARE
     latest_version TEXT;
