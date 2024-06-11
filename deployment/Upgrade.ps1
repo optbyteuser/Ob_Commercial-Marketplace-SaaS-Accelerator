@@ -63,13 +63,13 @@ dotnet-ef migrations script `
     --context SaaSKitContext `
     --project ../src/DataAccess/DataAccess.csproj `
     --startup-project ../src/AdminSite/AdminSite.csproj `
-    --output script.sql
+    --output ../deployment/script.sql
 	
 Write-host "## Generated migration script"	
 
 Write-host "## !!!Attempting to upgrade database to migration compatibility.!!!"
 
-$compatibilityScript = @"
+$compatibilityScript = $(cat << EOF
 CREATE OR REPLACE FUNCTION upgrade_database() RETURNS VOID AS '
 DECLARE
     latest_version TEXT;
@@ -101,7 +101,10 @@ BEGIN
     END IF;
 END;
 ' LANGUAGE plpgsql;
-"@
+
+SELECT upgrade_database();
+EOF
+)
 
 # Execute compatibility script against database
 psql --host=$dbHost  --port=$port --username=$user --dbname=$database --command="$compatibilityScript"
