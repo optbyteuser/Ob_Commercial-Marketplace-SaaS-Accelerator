@@ -286,10 +286,10 @@ namespace Marketplace.SaaS.Accelerator.DataAccess.Migrations.Custom
                                     VALUES 
                                         ('Int','{seedDate}','int'),
                                         ('String','{seedDate}','string'),
-                                        ('Date','{seedDate}','date')
+                                        ('Date','{seedDate}','date');
                                     ");
           
-            migrationBuilder.Sql(@$"INSERT INTO ""Roles"" (""Name"") VALUES ('PublisherAdmin')");
+            migrationBuilder.Sql(@$"INSERT INTO ""Roles"" (""Name"") VALUES ('PublisherAdmin');");
 
             migrationBuilder.Sql(@$"
                                     INSERT INTO ""Events""
@@ -297,7 +297,7 @@ namespace Marketplace.SaaS.Accelerator.DataAccess.Migrations.Custom
                                     VALUES
                                         ('Activate',true,'{seedDate}'),
 	                                    ('Unsubscribe',true,'{seedDate}'),
-	                                    ('Pending Activation',true,'{seedDate}')
+	                                    ('Pending Activation',true,'{seedDate}');
                                     ");
 
             migrationBuilder.Sql(@$"
@@ -314,7 +314,7 @@ namespace Marketplace.SaaS.Accelerator.DataAccess.Migrations.Custom
 	                                    ('IsEmailEnabledForSubscriptionActivation','true','Active Email Enabled'),
 	                                    ('IsEmailEnabledForUnsubscription','true','Unsubscribe Email Enabled'),
 	                                    ('IsAutomaticProvisioningSupported','false','Skip Activation - Automatic Provisioning Supported'),
-	                                    ('IsEmailEnabledForPendingActivation','false','Email Enabled For Pending Activation')
+	                                    ('IsEmailEnabledForPendingActivation','false','Email Enabled For Pending Activation');
                                     ");
             
             migrationBuilder.Sql(@$"   
@@ -338,7 +338,7 @@ namespace Marketplace.SaaS.Accelerator.DataAccess.Migrations.Custom
                                     ('Failed','Failed','{seedDate}', '{FAILED_EMAIL_TEMPLATE}','Failed',true),
 	                                ('PendingActivation','Pending Activation','{seedDate}', '{PENDINGACTIVATION_EMAIL_TEMPLATE}','Pending Activation',true),
 	                                ('Subscribed','Subscribed','{seedDate}', '{SUBSCRIBED_EMAIL_TEMPLATE}','Subscribed',true),
-	                                ('Unsubscribed','Unsubscribed','{seedDate}', '{UNSUBSCRIBED_EMAIL_TEMPLATE}','Unsubscribed',true)
+	                                ('Unsubscribed','Unsubscribed','{seedDate}', '{UNSUBSCRIBED_EMAIL_TEMPLATE}','Unsubscribed',true);
                                 ");
 
         }
