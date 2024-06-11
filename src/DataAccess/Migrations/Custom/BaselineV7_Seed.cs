@@ -17,7 +17,7 @@ namespace Marketplace.SaaS.Accelerator.DataAccess.Migrations.Custom
                                 INSERT INTO ApplicationConfiguration (""Name"", ""Value"", ""Description"")
                                 SELECT 'WebNotificationUrl', '', 'Setting this URL will enable pushing LandingPage/Webhook events to this external URL'
                                 WHERE NOT EXISTS (
-                                    SELECT 1 FROM ""ApplicationConfiguration"" WHERE ""Name"" = 'WebNotificationUrl'
+                                    SELECT 1 FROM ApplicationConfiguration WHERE ""Name"" = 'WebNotificationUrl'
                                 );
 
                                 INSERT INTO ApplicationConfiguration (""Name"", ""Value"", ""Description"")
