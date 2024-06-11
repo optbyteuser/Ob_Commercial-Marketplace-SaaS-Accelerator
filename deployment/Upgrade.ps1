@@ -65,6 +65,13 @@ dotnet-ef migrations script `
     --startup-project ../src/AdminSite/AdminSite.csproj `
     --output deployment/script.sql
 	
+	# Check if the path exists
+$outputPath = Resolve-Path "../deployment/script.sql"
+if (Test-Path $outputPath) {
+    Write-Host "Output file exists at: $outputPath"
+} else {
+    Write-Host "Output file does not exist."
+}
 Write-host "## Generated migration script"	
 
 Write-host "## !!!Attempting to upgrade database to migration compatibility.!!!"
