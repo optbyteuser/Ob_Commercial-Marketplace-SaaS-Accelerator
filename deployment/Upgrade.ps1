@@ -63,7 +63,7 @@ dotnet-ef migrations script `
     --context SaaSKitContext `
     --project ../src/DataAccess/DataAccess.csproj `
     --startup-project ../src/AdminSite/AdminSite.csproj `
-    --output ../deployment/script.sql
+    --output deployment/script.sql
 	
 Write-host "## Generated migration script"	
 
