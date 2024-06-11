@@ -23,7 +23,7 @@ namespace Marketplace.SaaS.Accelerator.DataAccess.Migrations.Custom
 
                                 ");
             migrationBuilder.Sql(@$"
-                                INSERT INTO ""ApplicationConfiguration"" ( ""Name"", ""Value"", ""Description"" ) VALUES 
+                                INSERT INTO ApplicationConfiguration ( ""Name"", ""Value"", ""Description"" ) VALUES 
                                     ( 'EnableHourlyMeterSchedules', 'False', 'This will enable to run Hourly meter scheduled items' ),
                                     ( 'EnableDailyMeterSchedules',  'False', 'This will enable to run Daily meter scheduled items' ),
                                     ( 'EnableWeeklyMeterSchedules', 'False', 'This will enable to run Weekly meter scheduled items' ),
