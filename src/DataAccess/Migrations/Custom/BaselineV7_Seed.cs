@@ -58,7 +58,7 @@ namespace Marketplace.SaaS.Accelerator.DataAccess.Migrations.Custom
                                 <p>The following section is the detail results.</p><hr/> 
                                 <table border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"" id=""templateBody""> 
                                 ****ResponseJson**** </table></td></tr></table></td></tr></table><!-- // END BODY --></td></tr> </table> <!-- // END TEMPLATE --> 
-                                </center> </body> </html>', 'Scheduled SaaS Metered Usage Submitted Successfully!', 'True'
+                                </center> </body> </html>', 'Scheduled SaaS Metered Usage Submitted Successfully!', true
                                 WHERE NOT EXISTS (
                                     SELECT 1 FROM ""EmailTemplate"" WHERE ""Status"" = 'Accepted'
                                 );
@@ -78,7 +78,7 @@ namespace Marketplace.SaaS.Accelerator.DataAccess.Migrations.Custom
                                 <p>The following section is the detail results.</p><hr/> 
                                 <table border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"" id=""templateBody""> 
                                 ****ResponseJson****</table></td></tr></table></td> </tr></table><!-- // END BODY --></td></tr></table><!-- // END TEMPLATE --> 
-                                </center></body></html>', 'Scheduled Task Failed to Submit Data!', 'True'
+                                </center></body></html>', 'Scheduled Task Failed to Submit Data!', true
                                 WHERE NOT EXISTS (
                                     SELECT 1 FROM ""EmailTemplate"" WHERE ""Status"" = 'Failure'
                                 );
