@@ -95,7 +95,7 @@ WHERE NOT EXISTS (SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '2
 psql --host=$dbHost  --port=$port --username=$user --dbname=$database --command="$compatibilityScript"
 
 # Execute migration script against database
-psql --host=$dbHost  --port=$port --username=$user --dbname=$database --inputFile="script.sql"
+psql --host=$dbHost  --port=$port --username=$user --dbname=$database --file="script.sql"
 
 Write-host "## Ran migration against database"	
 
