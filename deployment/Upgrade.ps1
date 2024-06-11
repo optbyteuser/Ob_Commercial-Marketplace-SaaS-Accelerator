@@ -70,12 +70,12 @@ Write-host "## Generated migration script"
 Write-host "## !!!Attempting to upgrade database to migration compatibility.!!!"
 
 $compatibilityScript = @"
-CREATE OR REPLACE FUNCTION upgrade_database() RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION upgrade_database() RETURNS VOID AS '
 DECLARE
     latest_version TEXT;
 BEGIN
     -- Check if table __EFMigrationsHistory exists
-    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '__EFMigrationsHistory') THEN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = ''__EFMigrationsHistory'') THEN
         -- No __EFMigrations table means Database has not been upgraded to support EF Migrations
         CREATE TABLE "__EFMigrationsHistory" (
             "MigrationId" VARCHAR(150) NOT NULL,
@@ -88,19 +88,19 @@ BEGIN
         ORDER BY CreateBy DESC
         LIMIT 1;
         -- Insert data based on version number
-        IF latest_version = '2.10' THEN
+        IF latest_version = ''2.10'' THEN
             INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion") 
-            VALUES ('20221118045814_Baseline_v2', '6.0.1');
-        ELSIF latest_version = '5.00' THEN
+            VALUES (''20221118045814_Baseline_v2'', ''6.0.1'');
+        ELSIF latest_version = ''5.00'' THEN
             INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")  
-            VALUES ('20221118045814_Baseline_v2', '6.0.1'), ('20221118203340_Baseline_v5', '6.0.1');
-        ELSIF latest_version = '6.10' THEN
+            VALUES (''20221118045814_Baseline_v2'', ''6.0.1''), (''20221118203340_Baseline_v5'', ''6.0.1'');
+        ELSIF latest_version = ''6.10'' THEN
             INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")  
-            VALUES ('20221118045814_Baseline_v2', '6.0.1'), ('20221118203340_Baseline_v5', '6.0.1'), ('20221118211554_Baseline_v6', '6.0.1');
+            VALUES (''20221118045814_Baseline_v2'', ''6.0.1''), (''20221118203340_Baseline_v5'', ''6.0.1''), (''20221118211554_Baseline_v6'', ''6.0.1'');
         END IF;
     END IF;
 END;
-$$ LANGUAGE plpgsql;
+' LANGUAGE plpgsql;
 "@
 
 # Execute compatibility script against database
