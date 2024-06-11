@@ -107,7 +107,7 @@ BEGIN
     END IF;
 END;
 ' LANGUAGE plpgsql;
-
+"@
 
 # Execute compatibility script against database
 Invoke-Expression "psql --host=$dbHost  --port=$port --username=$user --dbname=$database --command=`"$compatibilityScript`""
