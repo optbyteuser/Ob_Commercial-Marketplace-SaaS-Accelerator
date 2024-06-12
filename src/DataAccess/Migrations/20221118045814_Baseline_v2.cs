@@ -498,8 +498,8 @@ namespace Marketplace.SaaS.Accelerator.DataAccess.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "ApplicationConfiguration");
+            //migrationBuilder.DropTable(
+            //    name: "ApplicationConfiguration");
 
             migrationBuilder.DropTable(
                 name: "ApplicationLog");
