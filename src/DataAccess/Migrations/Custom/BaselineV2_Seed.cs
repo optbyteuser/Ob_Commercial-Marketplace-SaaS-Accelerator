@@ -19,7 +19,7 @@ namespace Marketplace.SaaS.Accelerator.DataAccess.Migrations.Custom
         public static void BaselineV2_SeedStoredProcedures(this MigrationBuilder migrationBuilder)
         {
             //SQL Stored Procedures
-
+            migrationBuilder.Sql(@"CREATE EXTENSION IF NOT EXISTS ""uuid-ossp"";");
             migrationBuilder.Sql(@"
                                 /*   
                                 Exec spGetSubscriptionParameters '53ff9e28-a55b-65e1-ff75-709aec6420fd','a35d4259-f3c9-429b-a871-21c4593fa4bf'  
