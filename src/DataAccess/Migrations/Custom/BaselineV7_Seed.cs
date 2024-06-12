@@ -14,12 +14,19 @@ namespace Marketplace.SaaS.Accelerator.DataAccess.Migrations.Custom
         {
             var seedDate = DateTime.Now;
             migrationBuilder.Sql(@$"
-                                INSERT INTO public.""ApplicationConfiguration"" (""Name"", ""Value"", ""Description"")
+                                INSERT INTO ""SchedulerFrequency"" (""Frequency"")
+                                SELECT 'OneTime'
+                                WHERE NOT EXISTS (
+                                    SELECT 1
+                                    FROM ""SchedulerFrequency""
+                                    WHERE ""Frequency"" = 'OneTime'
+                                );
+                                INSERT INTO ""ApplicationConfiguration"" (""Name"", ""Value"", ""Description"")
                                 SELECT 'WebNotificationUrl', '', 'Setting this URL will enable pushing LandingPage/Webhook events to this external URL'
                                 WHERE NOT EXISTS (
                                 SELECT 1 FROM ""ApplicationConfiguration"" WHERE ""Name"" = 'WebNotificationUrl'
                                 );
-                                INSERT INTO public.""ApplicationConfiguration"" (""Name"", ""Value"", ""Description"")
+                                INSERT INTO ""ApplicationConfiguration"" (""Name"", ""Value"", ""Description"")
                                 SELECT 'EnablesSuccessfulSchedulerEmail', 'False', 'This will enable sending email for successful metered usage.'
                                 WHERE NOT EXISTS (
                                     SELECT 1 FROM ""ApplicationConfiguration"" WHERE ""Name"" = 'EnablesSuccessfulSchedulerEmail'
